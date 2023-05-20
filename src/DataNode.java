@@ -1,12 +1,9 @@
 public class DataNode {
     private String value;
     private DataNode next;
-
-    public DataNode(String value, DataNode next) {
+    public DataNode(String value) {
         this.value = value;
-        this.next = next;
     }
-
     public String getValue() {
         return value;
     }

@@ -1,12 +1,10 @@
 public class Contact {
     private String name;
     private Contact next;
-    private PropertyNode down;
+    private PropertyNode property;
 
-    public Contact(String name, Contact next, PropertyNode down) {
+    public Contact(String name) {
         this.name = name;
-        this.next = next;
-        this.down = down;
     }
 
     public String getName() {
@@ -25,11 +23,11 @@ public class Contact {
         this.next = next;
     }
 
-    public PropertyNode getDown() {
-        return down;
+    public PropertyNode getProperty() {
+        return property;
     }
 
-    public void setDown(PropertyNode down) {
-        this.down = down;
+    public void setProperty(PropertyNode property) {
+        this.property = property;
     }
 }

@@ -4,7 +4,7 @@ public class PropertyNode {
     private PropertyNode down;
     private DataNode data;
 
-    public PropertyNode(String title, PropertyNode next, PropertyNode down, DataNode data) {
+    public PropertyNode(String title) {
         this.title = title;
         this.next = next;
         this.down = down;
