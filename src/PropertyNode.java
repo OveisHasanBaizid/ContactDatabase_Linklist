@@ -6,9 +6,6 @@ public class PropertyNode {
 
     public PropertyNode(String title) {
         this.title = title;
-        this.next = next;
-        this.down = down;
-        this.data = data;
     }
 
     public String getTitle() {

@@ -8,13 +8,13 @@ public class Main {
     Contact contacts;
     Contact head;
     int size;
-
+    Contact contact = null;
     public Main() throws IOException {
         input = new Scanner(System.in);
         head = null;
         size = 0;
         readFromFile();
-
+        print();
     }
 
     private void menu() throws IOException {
@@ -48,116 +48,126 @@ public class Main {
         }
         menu();
     }
-    public void addProperty(){
+
+    public void addProperty() {
         System.out.println(" * * * Add Property * * * ");
         System.out.print("Enter name contact : ");
         String contactName = input.nextLine();
         System.out.print("Enter name property : ");
         String property = input.nextLine();
         Contact contact = findContact(contactName);
-        if(contact==null)
+        if (contact == null)
             System.out.println("The desired contact is not available in the list.");
-        else{
-            addToContact(" -Property: "+property,contact.getProperty());
+        else {
+            addToContact(" -Property: " + property, contact.getProperty());
             System.out.println("Property successfully added.");
         }
     }
-    public void removeProperty(){
+
+    public void removeProperty() {
         System.out.println(" * * * Remove Property * * * ");
         System.out.print("Enter name contact : ");
         String contactName = input.nextLine();
         System.out.print("Enter name property : ");
         String property = input.nextLine();
         Contact contact = findContact(contactName);
-        if(contact==null)
+        if (contact == null)
             System.out.println("The desired contact is not available in the list.");
-        else{
-            if (deleteProperty(property,contact.getProperty()))
+        else {
+            if (deleteProperty(property, contact.getProperty()))
                 System.out.println("Property successfully remove.");
             else
                 System.out.println("This feature is not defined for the target contact.");
         }
     }
-    public void print(){
+
+    public void print() {
         System.out.println(" * * * Print List * * * ");
-        Contact contact = head;
-        while (contact!=null){
-            System.out.println("-Contact: "+contact.getName());
-            printProperty(contact.getProperty(),1);
+        contact = head;
+        while (contact != null) {
+            System.out.println("-Contact: " + contact.getName());
+            printProperty(contact.getProperty(), 1);
         }
     }
-    public void printProperty(PropertyNode propertyNode , int n){
-        for (int i = 0; i < n ; i++) {
+
+    public void printProperty(PropertyNode propertyNode, int n) {
+        for (int i = 0; i < n; i++) {
             System.out.print("\t");
         }
-        System.out.println("-Property: "+propertyNode.getTitle());
+        System.out.println("-Property: " + propertyNode.getTitle());
         DataNode data = propertyNode.getData();
-        while (data!=null){
-            for (int i = 0; i < n+1; i++) {
+        while (data != null) {
+            for (int i = 0; i < n + 1; i++) {
                 System.out.println("\t");
             }
-            System.out.println("-Value: "+data.getValue());
+            System.out.println("-Value: " + data.getValue());
             data = data.getNext();
         }
-     //   printProperty(propertyNode.,);
+        printProperty(propertyNode.getNext(), n);
     }
-    public void removeValue(){
+
+    public void removeValue() {
         System.out.println(" * * * Remove Value * * * ");
         System.out.print("Enter name contact : ");
         String contactName = input.nextLine();
         System.out.print("Enter value : ");
         String value = input.nextLine();
         Contact contact = findContact(contactName);
-        if(contact==null)
+        if (contact == null)
             System.out.println("The desired contact is not available in the list.");
-        else{
-            if (deleteValue(value,contact.getProperty()))
+        else {
+            if (deleteValue(value, contact.getProperty()))
                 System.out.println("Value successfully remove.");
             else
                 System.out.println("This value is not defined for the target contact.");
         }
     }
-    public boolean deleteProperty(String title , PropertyNode property){
-        if(property==null)
+
+    public boolean deleteProperty(String title, PropertyNode property) {
+        if (property == null)
             return false;
-        if (property.getTitle().equals(title)){
+        if (property.getTitle().equals(title)) {
             property = null;
             return true;
         }
-        if (property.getDown()!=null)
-            return deleteProperty(title,property.getDown());
-        return deleteProperty(title,property.getNext());
+        if (property.getDown() != null)
+            return deleteProperty(title, property.getDown());
+        return deleteProperty(title, property.getNext());
     }
-    public boolean deleteValue(String value , PropertyNode property){
-        if(property==null || property.getData()==null)
+
+    public boolean deleteValue(String value, PropertyNode property) {
+        if (property == null || property.getData() == null)
             return false;
         DataNode data = property.getData();
-        while (data!=null){
-            if (data.getValue().equals(value)){
+        while (data != null) {
+            if (data.getValue().equals(value)) {
                 data = null;
                 return true;
             }
             data = data.getNext();
         }
-        if (property.getDown()!=null)
-            return deleteProperty(value,property.getDown());
-        return deleteProperty(value,property.getNext());
+        if (property.getDown() != null)
+            return deleteProperty(value, property.getDown());
+        return deleteProperty(value, property.getNext());
     }
-    public Contact findContact(String name){
+
+    public Contact findContact(String name) {
         Contact temp = head;
-        while (temp!=null){
+        while (temp != null) {
             if (temp.getName().equals(name))
                 return temp;
             temp = temp.getNext();
         }
         return null;
     }
-    public void deleteList(){
+
+    public void deleteList() {
         head = null;
         System.out.println("The list was successfully deleted.");
     }
+
     public void readFromFile() throws IOException {
-        FileReader fileReader = new FileReader("");
+        FileReader fileReader = new FileReader("Data");
         BufferedReader br = new BufferedReader(fileReader);
         Contact contact = null;
         String s;
@@ -166,13 +176,13 @@ public class Main {
                 if (contact == null) {
                     contact = new Contact(s.substring(11));
                     head = contact;
+                    contact.setProperty(new PropertyNode(""));
                 } else {
                     contact.setNext(new Contact(s.substring(11)));
                     contact = contacts.getNext();
                 }
             } else {
-                assert contact != null;
-                addToContact(s.substring(1), contact.getProperty());
+                addToContact(s, contact.getProperty());
             }
         }
         fileReader.close();
@@ -180,26 +190,39 @@ public class Main {
     }
 
     public void addToContact(String line, PropertyNode property) {
-        if(line.charAt(2) == 'V') {
-            if(property.getNext()!=null){
-                setData(line.substring(9),property.getNext().getData());
-            } else
+        if (line.charAt(2) == 'V') {
+            if (property.getData() == null) {
                 property.setData(new DataNode(line.substring(9)));
-        }else if(line.charAt(2) == 'P') {
-            if (property == null)
-                property = new PropertyNode(line.substring(12));
-            else
-                addToContact(line,property.getNext());
-        }else{
-            addToContact(line.substring(1), property.getDown());
+                System.out.println("Add value : "+property.getData().getValue()+"\t TO "+property.getTitle());
+            } else {
+                DataNode data = property.getData();
+                while (data.getNext() != null) {
+                    data = data.getNext();
+                }
+                data.setNext(new DataNode(line.substring(9)));
+                System.out.println("Add value : "+data.getValue()+"\t TO "+property.getTitle());
+            }
+
+        } else if (line.charAt(2) == 'P') {
+            if (property.getNext() == null) {
+                property.setNext(new PropertyNode(line.substring(12)));
+                System.out.println("Add property : "+property.getNext().getTitle());
+            }else {
+                property.getNext().setNext(new PropertyNode(line.substring(12)));
+                System.out.println("Add property : "+property.getNext().getNext().getTitle());
+            }
+        } else {
+            addToContact(line.substring(1), property.getNext());
         }
     }
-    public void setData(String data , DataNode dataNode){
-        if (dataNode!=null)
-            setData(data,dataNode.getNext());
+
+    public void setData(String data, DataNode dataNode) {
+        if (dataNode != null)
+            setData(data, dataNode.getNext());
         else
             dataNode = new DataNode(data);
     }
+
     public static void main(String[] args) throws IOException {
         new Main();
     }
