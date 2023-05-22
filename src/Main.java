@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -9,6 +10,9 @@ public class Main {
     Contact head;
     int size;
     Contact contact = null;
+    ArrayList<PropertyNode> nodeArrayList = new ArrayList<>();
+    PropertyNode property;
+
     public Main() throws IOException {
         input = new Scanner(System.in);
         head = null;
@@ -59,7 +63,7 @@ public class Main {
         if (contact == null)
             System.out.println("The desired contact is not available in the list.");
         else {
-            addToContact(" -Property: " + property, contact.getProperty());
+            //   addToContact(" -Property: " + property, contact.getProperty());
             System.out.println("Property successfully added.");
         }
     }
@@ -84,10 +88,10 @@ public class Main {
     public void print() {
         System.out.println(" * * * Print List * * * ");
         contact = head;
-        while (contact != null) {
-            System.out.println("-Contact: " + contact.getName());
-            printProperty(contact.getProperty(), 1);
-        }
+        //   while (contact != null) {
+        System.out.println("-Contact: " + contact.getName());
+        printProperty(contact.getProperty(), 1);
+        //   }
     }
 
     public void printProperty(PropertyNode propertyNode, int n) {
@@ -98,12 +102,15 @@ public class Main {
         DataNode data = propertyNode.getData();
         while (data != null) {
             for (int i = 0; i < n + 1; i++) {
-                System.out.println("\t");
+                System.out.print("\t");
             }
             System.out.println("-Value: " + data.getValue());
             data = data.getNext();
         }
-        printProperty(propertyNode.getNext(), n);
+        if (propertyNode.getDown() != null)
+            printProperty(propertyNode.getDown(), n);
+        if (propertyNode.getNext() != null)
+            printProperty(propertyNode.getNext(), n);
     }
 
     public void removeValue() {
@@ -176,44 +183,62 @@ public class Main {
                 if (contact == null) {
                     contact = new Contact(s.substring(11));
                     head = contact;
-                    contact.setProperty(new PropertyNode(""));
+                    PropertyNode p = new PropertyNode("");
+                    contact.setProperty(p);
+                    nodeArrayList.add(p);
                 } else {
                     contact.setNext(new Contact(s.substring(11)));
                     contact = contacts.getNext();
                 }
             } else {
-                addToContact(s, contact.getProperty());
+                if (s.contains("-Property: ")) {
+                    addPropertyToList(s, 0);
+                } else {
+                    addValueToList(s, 0);
+                }
             }
         }
         fileReader.close();
         System.out.println("The file was read successfully.");
     }
 
-    public void addToContact(String line, PropertyNode property) {
-        if (line.charAt(2) == 'V') {
-            if (property.getData() == null) {
-                property.setData(new DataNode(line.substring(9)));
-                System.out.println("Add value : "+property.getData().getValue()+"\t TO "+property.getTitle());
+    public void addPropertyToList(String line, int i) {
+        if (line.charAt(2) == 'P') {
+            PropertyNode p = new PropertyNode(line.substring(12));
+            if (i >= nodeArrayList.size()-1 && i != 0) {
+                if(nodeArrayList.get(i - 1).getDown()==null){
+                    nodeArrayList.get(i - 1).setDown(p);
+                    nodeArrayList.add(p);
+                }else{
+                    PropertyNode pro = nodeArrayList.get(i - 1).getDown();
+                    while (pro.getNext()!=null)
+                        pro = pro.getNext();
+                    p.setNext(p);
+                    nodeArrayList.set(i, p);
+                }
+                System.out.println("PropertyN : "+p.getTitle()+" TO "+nodeArrayList.get(i - 1).getTitle());
             } else {
-                DataNode data = property.getData();
+                nodeArrayList.get(i).setNext(p);
+                nodeArrayList.set(i, p);
+            }
+        } else
+            addPropertyToList(line.substring(1), i + 1);
+    }
+
+    public void addValueToList(String line, int i) {
+        if (line.charAt(2) == 'V') {
+            DataNode d = new DataNode(line.substring(9));
+            if (nodeArrayList.get(i-1).getData() == null)
+                nodeArrayList.get(i-1).setData(d);
+            else {
+                DataNode data = nodeArrayList.get(i-1).getData();
                 while (data.getNext() != null) {
                     data = data.getNext();
                 }
                 data.setNext(new DataNode(line.substring(9)));
-                System.out.println("Add value : "+data.getValue()+"\t TO "+property.getTitle());
             }
-
-        } else if (line.charAt(2) == 'P') {
-            if (property.getNext() == null) {
-                property.setNext(new PropertyNode(line.substring(12)));
-                System.out.println("Add property : "+property.getNext().getTitle());
-            }else {
-                property.getNext().setNext(new PropertyNode(line.substring(12)));
-                System.out.println("Add property : "+property.getNext().getNext().getTitle());
-            }
-        } else {
-            addToContact(line.substring(1), property.getNext());
-        }
+        } else
+            addValueToList(line.substring(1), i + 1);
     }
 
     public void setData(String data, DataNode dataNode) {
